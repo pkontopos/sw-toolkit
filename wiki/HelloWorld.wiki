@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary how you going
 
 = Introduction =
 
@@ -11,5 +11,3 @@ I think have been a developer for a long time, and have used a lot of very usefu
 I believe it is useful and simple. So i named it as SW, simple web.
 
 I believe simple is beautiful. I hope that simple tools can help you.
-
-
