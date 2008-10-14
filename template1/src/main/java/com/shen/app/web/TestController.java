@@ -11,7 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.shen.app.bo.GenericBo;
 import com.shen.app.common.Utils;
 import com.shen.app.model.SysUser;
-
+/**
+ * 
+ * @author shenzj
+ *
+ */
 @Controller
 public class TestController {
 	

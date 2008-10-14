@@ -3,7 +3,11 @@ package com.shen.app.bo;
 import java.util.Date;
 
 import org.springframework.stereotype.Service;
-
+/**
+ * 
+ * @author shenzj
+ *
+ */
 @Service("taskBo")
 public class TaskBoImpl implements TaskBo { 
 	

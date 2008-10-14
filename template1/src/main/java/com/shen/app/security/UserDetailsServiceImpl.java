@@ -16,7 +16,11 @@ import org.springframework.stereotype.Service;
 
 import com.shen.app.bo.GenericBo;
 import com.shen.app.model.SysUser;
-
+/**
+ * 
+ * @author shenzj
+ *
+ */
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 	@Autowired
