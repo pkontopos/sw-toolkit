@@ -7,7 +7,11 @@ import org.springframework.stereotype.Service;
 
 import com.shen.app.bo.GenericBo;
 import com.shen.app.model.SysUser;
-
+/**
+ * 
+ * @author shenzj
+ *
+ */
 @Service("webService")
 public class WebService {
 	@Autowired

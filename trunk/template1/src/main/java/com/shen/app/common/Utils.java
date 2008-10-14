@@ -10,7 +10,11 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.BeanUtils;
-
+/**
+ * 
+ * @author shenzj
+ *
+ */
 public class Utils {
 	public static void populate(Object bean, HttpServletRequest request, String prefix) {
         Map map = request.getParameterMap();

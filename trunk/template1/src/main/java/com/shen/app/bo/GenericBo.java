@@ -3,6 +3,11 @@ package com.shen.app.bo;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 
+ * @author shenzj
+ *
+ */
 public interface GenericBo {
 	
 	public <T> void create(T modelObject);

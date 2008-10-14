@@ -5,7 +5,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
+/**
+ * 
+ * @author shenzj
+ *
+ */
 @Entity
 @Table(name = "TEST_USER")
 public class SysUser {
