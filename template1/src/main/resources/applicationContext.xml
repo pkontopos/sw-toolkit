@@ -37,7 +37,7 @@
 		class="com.shen.app.common.CommonLogger" />
 	<aop:config>
 		<aop:pointcut id="webServiceOperation"
-			expression="execution(public * com.shen.app.*.*(..))" />
+			expression="execution(public * com.shen.app.bo.*.*(..))" />
 		<aop:advisor advice-ref="commonLogger"
 			pointcut-ref="webServiceOperation" />
 	</aop:config>
