@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<!-- *************** CONFIGURATIONS & MESSAGES *************** -->
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>messages</value>
+			</list>
+		</property>
+		<property name="useCodeAsDefaultMessage" value="true" />
+	</bean>
+
+	<bean id="propertyPlaceHolderConfig"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:config.properties"></property>
+	</bean>
+
+	
+	<!-- common logging -->  
+	<bean id = "commonLogger"
+		class="com.shen.app.common.CommonLogger" />
+	<aop:config>
+		<aop:pointcut id="webServiceOperation"
+			expression="execution(public * com.shen.app.*.*(..))" />
+		<aop:advisor advice-ref="commonLogger"
+			pointcut-ref="webServiceOperation" />
+	</aop:config>
+	
+	<!-- BO,DAO,WebService,security --> 
+	<context:component-scan base-package="com.shen.app.bo" />
+	<context:component-scan base-package="com.shen.app.dao"/>
+	<context:component-scan base-package="com.shen.app.webservice"/> 
+	<context:component-scan base-package="com.shen.app.security"/> 
+	
+
+</beans>
