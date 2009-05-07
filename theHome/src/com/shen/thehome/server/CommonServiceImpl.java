@@ -32,7 +32,7 @@ public class CommonServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public List<String> fetchMessage() {
-		Date lastFetch = (Date)userMap.get(getCurrentUser());
+		Date lastFetch = (Date) userMap.get(getCurrentUser());
 		if (lastFetch == null) {// get 1 day ago
 			Calendar c1 = Calendar.getInstance();
 			c1.add(Calendar.DATE, -1);
@@ -47,39 +47,36 @@ public class CommonServiceImpl extends RemoteServiceServlet implements
 		ms.sendMessage(msg, getCurrentUser(), receiver);
 	}
 
-	
-
 	@Override
 	public String login(String userId) {
+		String oldId = (String) getSession().getAttribute("userId");
 		getSession().setAttribute("userId", userId);
 		userMap.put(userId, new Date());
+		userMap.remove(oldId);
 		return "login in";
 	}
 
 	@Override
 	public List<String> getUsers() {
 		// remove idle user (1 min);
-		long now = new Date().getTime(); 
-		long expireTime = 60*1000;
+		long now = new Date().getTime();
+		long expireTime = 60 * 1000;
 		Set<String> userSet = userMap.keySet();
 		List<String> removedUser = new ArrayList<String>();
 		for (String userId : userSet) {
-			Date last = (Date)userMap.get(userId);
-			if ((now - last.getTime())>expireTime){
+			Date last = (Date) userMap.get(userId);
+			if ((now - last.getTime()) > expireTime) {
 				removedUser.add(userId);
 			}
 		}
 		for (String userId : removedUser) {
 			userMap.remove(userId);
-		} 
-		System.out.println(userSet.size());
-		List<String> uList = new ArrayList<String>(userSet); 
-		 
+		}
+		List<String> uList = new ArrayList<String>(userSet);
+
 		return uList;
 	}
-	
-	
-	
+
 	private String getCurrentUser() {
 		String userId = (String) getSession().getAttribute("userId");
 		if (userId == null)
