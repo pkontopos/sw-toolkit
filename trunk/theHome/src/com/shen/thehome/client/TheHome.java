@@ -1,12 +1,15 @@
 package com.shen.thehome.client;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -15,6 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class TheHome implements EntryPoint {
 
@@ -30,7 +34,30 @@ public class TheHome implements EntryPoint {
 		dock.setSpacing(4);
 		dock.setHorizontalAlignment(DockPanel.ALIGN_CENTER);
 		// Add text all around
-		dock.add(status, DockPanel.NORTH);
+		FlowPanel northPanel = new FlowPanel();
+		final TextBox userBox = new TextBox();
+		userBox.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				login(userBox.getText());
+				// set Cookie
+				Date now = new Date();
+				long nowLong = now.getTime();
+				nowLong = nowLong + (1000 * 60 * 60 * 24 * 7);// seven days
+				now.setTime(nowLong); 
+				Cookies.setCookie("userName", userBox.getText(), now); 
+			}
+
+		});
+		String usedName = Cookies.getCookie("userName");
+		if (usedName!=null){
+			userBox.setText(usedName);
+		}
+		
+		login(userBox.getText());
+		northPanel.add(userBox);
+		northPanel.add(status);
+		dock.add(northPanel, DockPanel.NORTH);
 
 		FlowPanel eastPanel = new FlowPanel();
 		dock.add(eastPanel, DockPanel.EAST);
@@ -39,86 +66,92 @@ public class TheHome implements EntryPoint {
 		eastPanel.add(userListBox);
 
 		FlowPanel southPanel = new FlowPanel();
-		final TextArea inputArea = new TextArea(); 
+		final TextArea inputArea = new TextArea();
 		southPanel.add(inputArea);
 		dock.add(southPanel, DockPanel.SOUTH);
 
 		FlowPanel scroller = new FlowPanel();
 		final TextArea mainWin = new TextArea();
 		mainWin.setSize("600px", "300px");
+		mainWin.setStyleName("mainWin");
+		mainWin.setReadOnly(true);
 		inputArea.setSize("600px", "50px");
 		southPanel.add(inputArea);
 		scroller.add(mainWin);
 		dock.add(scroller, DockPanel.CENTER);
 
-		inputArea.addKeyUpHandler(new KeyUpHandler(){  
+		inputArea.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				int code = (int)event.getNativeKeyCode();
-				if (code==13){
+				int code = (int) event.getNativeKeyCode();
+				if (code == 13) {
 					String msg = inputArea.getText();
 					inputArea.setText("");
-					commonService.sendMessage(msg, "all", new AsyncCallback(){ 
+					commonService.sendMessage(msg, "all", new AsyncCallback() {
 						@Override
-						public void onFailure(Throwable caught) { 
-						} 
-						@Override
-						public void onSuccess(Object result) { 
-						} 
-					});
-				}  
-			} 
-		});
-		
-		
-		commonService.login("anonymous", new AsyncCallback<String>() {
+						public void onFailure(Throwable caught) {
+						}
 
+						@Override
+						public void onSuccess(Object result) {
+						}
+					});
+				}
+			}
+		});
+
+		Timer t = new Timer() {
+			public void run() {
+				commonService.getUsers(new AsyncCallback<List<String>>() {
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(List<String> result) {
+						userListBox.clear();
+						for (String user : result) {
+							userListBox.addItem(user); 
+						}
+					}
+				});
+				commonService.fetchMessage(new AsyncCallback<List<String>>() {
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(List<String> result) {
+						for (String msg : result) {
+							mainWin.setText(mainWin.getText() + msg);
+							mainWin.setCursorPos(mainWin.getText().length());
+							inputArea.setFocus(true);
+						}
+					}
+				});
+
+			}
+		};
+
+		// Schedule the timer to run once in 5 seconds.
+		t.scheduleRepeating(3000);
+	}
+
+	private void login(String userId) {
+		if ((userId == null) || (userId.trim().length() == 0))
+			userId = "Anonymous";
+		commonService.login(userId, new AsyncCallback<String>() {
 			@Override
 			public void onFailure(Throwable caught) {
 			}
 
 			@Override
 			public void onSuccess(String result) {
-				status.setText(result); 
-				//Window.alert(result); 
 			}
-
 		});
-
-		Timer t = new Timer() {
-			public void run() {
-				commonService.getUsers(new AsyncCallback<List<String>>(){ 
-					@Override
-					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-						
-					} 
-					@Override
-					public void onSuccess(List<String> result) {
-						userListBox.clear();
-						for (String user : result) {
-							userListBox.addItem(user);
-						} 
-					} 
-				}); 
-				commonService.fetchMessage(new AsyncCallback<List<String>>(){ 
-					@Override
-					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-						
-					} 
-					@Override
-					public void onSuccess(List<String> result) { 
-						for (String msg : result) {
-							mainWin.setText(mainWin.getText()+ msg);
-						} 
-					} 
-				}); 
-				
-			}
-		};
-
-		// Schedule the timer to run once in 5 seconds.
-		t.scheduleRepeating(5000); 
 	}
 }
