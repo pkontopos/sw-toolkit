@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -24,6 +25,8 @@ public class TheHome implements EntryPoint {
 
 	private final CommonServiceAsync commonService = GWT
 			.create(CommonService.class);
+	final TextArea mainWin = new TextArea();
+	final TextArea inputArea = new TextArea();
 
 	public void onModuleLoad() {
 		RootPanel rootPanel = RootPanel.get("root");
@@ -44,16 +47,16 @@ public class TheHome implements EntryPoint {
 				Date now = new Date();
 				long nowLong = now.getTime();
 				nowLong = nowLong + (1000 * 60 * 60 * 24 * 7);// seven days
-				now.setTime(nowLong); 
-				Cookies.setCookie("userName", userBox.getText(), now); 
+				now.setTime(nowLong);
+				Cookies.setCookie("userName", userBox.getText(), now);
 			}
 
 		});
 		String usedName = Cookies.getCookie("userName");
-		if (usedName!=null){
+		if (usedName != null) {
 			userBox.setText(usedName);
 		}
-		
+
 		login(userBox.getText());
 		northPanel.add(userBox);
 		northPanel.add(status);
@@ -66,12 +69,12 @@ public class TheHome implements EntryPoint {
 		eastPanel.add(userListBox);
 
 		FlowPanel southPanel = new FlowPanel();
-		final TextArea inputArea = new TextArea();
+
 		southPanel.add(inputArea);
 		dock.add(southPanel, DockPanel.SOUTH);
 
-		FlowPanel scroller = new FlowPanel();
-		final TextArea mainWin = new TextArea();
+		FlowPanel scroller = new FlowPanel(); 
+		DOM.setElementAttribute(mainWin.getElement(), "id", "mainWin");
 		mainWin.setSize("600px", "300px");
 		mainWin.setStyleName("mainWin");
 		mainWin.setReadOnly(true);
@@ -94,13 +97,20 @@ public class TheHome implements EntryPoint {
 
 						@Override
 						public void onSuccess(Object result) {
+							getMsg();
 						}
 					});
 				}
 			}
 		});
 
-		Timer t = new Timer() {
+		new Timer() {
+			public void run() {
+				getMsg();
+			}
+		}.scheduleRepeating(5 * 1000);
+
+		new Timer() {
 			public void run() {
 				commonService.getUsers(new AsyncCallback<List<String>>() {
 					@Override
@@ -113,32 +123,31 @@ public class TheHome implements EntryPoint {
 					public void onSuccess(List<String> result) {
 						userListBox.clear();
 						for (String user : result) {
-							userListBox.addItem(user); 
+							userListBox.addItem(user);
 						}
 					}
 				});
-				commonService.fetchMessage(new AsyncCallback<List<String>>() {
-					@Override
-					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-
-					}
-
-					@Override
-					public void onSuccess(List<String> result) {
-						for (String msg : result) {
-							mainWin.setText(mainWin.getText() + msg);
-							mainWin.setCursorPos(mainWin.getText().length());
-							inputArea.setFocus(true);
-						}
-					}
-				});
-
 			}
-		};
+		}.scheduleRepeating(30 * 1000);
 
-		// Schedule the timer to run once in 5 seconds.
-		t.scheduleRepeating(3000);
+	}
+
+	private void getMsg() {
+		commonService.fetchMessage(new AsyncCallback<List<String>>() {
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+
+			@Override
+			public void onSuccess(List<String> result) {
+				for (String msg : result) {
+					mainWin.setText(mainWin.getText() + msg);
+					//mainWin.setCursorPos(mainWin.getText().length());
+					//inputArea.setFocus(true);
+					scroll();
+				}
+			}
+		});
 	}
 
 	private void login(String userId) {
@@ -154,4 +163,10 @@ public class TheHome implements EntryPoint {
 			}
 		});
 	}
+
+	public static native void scroll() /*-{
+		ta = $doc.getElementById("mainWin");
+		ta.scrollTop = ta.scrollHeight;
+	}-*/;
+
 }

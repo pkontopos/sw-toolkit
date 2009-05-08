@@ -2,8 +2,10 @@ package com.shen.thehome.server;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +23,7 @@ import com.shen.thehome.client.CommonService;
 public class CommonServiceImpl extends RemoteServiceServlet implements
 		CommonService {
 	MessageStore ms = new MemoryMessageStore();
-	Map<String, Date> userMap = new LinkedHashMap<String, Date>();
+	Map<String, Date> userMap = new HashMap<String, Date>();
 
 	public String greetServer(String input) {
 		String serverInfo = getServletContext().getServerInfo();
@@ -73,7 +75,7 @@ public class CommonServiceImpl extends RemoteServiceServlet implements
 			userMap.remove(userId);
 		}
 		List<String> uList = new ArrayList<String>(userSet);
-
+		Collections.sort(uList);
 		return uList;
 	}
 
