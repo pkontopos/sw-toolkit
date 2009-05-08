@@ -20,3 +20,4 @@ public interface CommonService extends RemoteService {
 	List<String> fetchMessage();
 
 }
+

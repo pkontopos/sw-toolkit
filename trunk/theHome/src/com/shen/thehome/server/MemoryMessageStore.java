@@ -1,5 +1,6 @@
 package com.shen.thehome.server;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,11 +11,12 @@ public class MemoryMessageStore implements MessageStore {
 
 	@Override
 	public List<String> fetchMessage(String receiver, Date lastFetch) {
-		long last = lastFetch.getTime();
+		//long last = lastFetch.getTime();
 		List<String> newList = new ArrayList<String>();
 		for (Message message : messageList) {
-			if  (last < message.time.getTime())  {
-				newList.add(message.sender+": "+message.message);
+			if  (lastFetch.before(message.time)) {
+				String time = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(message.time);
+				newList.add("("+time+")\n"+message.sender+": "+message.message );
 			}
 		} 
 		return newList;
