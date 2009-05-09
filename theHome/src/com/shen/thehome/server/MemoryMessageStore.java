@@ -2,23 +2,32 @@ package com.shen.thehome.server;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public class MemoryMessageStore implements MessageStore {
-	private List<Message> messageList = new ArrayList<Message>();
+	private List<Message> messageList = Collections
+			.synchronizedList(new ArrayList<Message>());
+
 	private long expireTime = 0;// 10 * 60 * 1000 10mins
 
 	@Override
 	public List<String> fetchMessage(String receiver, Date lastFetch) {
-		//long last = lastFetch.getTime();
+		// long last = lastFetch.getTime();
 		List<String> newList = new ArrayList<String>();
-		for (Message message : messageList) {
-			if  (lastFetch.before(message.time)) {
-				String time = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(message.time);
-				newList.add("("+time+")\n"+message.sender+": "+message.message );
+		for (int i = messageList.size() - 1; i >= 0; i--) {
+			Message message = messageList.get(i);
+			if (lastFetch.before(message.time)) {
+				String time = new SimpleDateFormat("yyyy/MM/dd HH:mm")
+						.format(message.time);
+				newList.add("(" + time + ")\n" + message.sender + ": "
+						+ message.message);
+			} else {
+				break;
 			}
-		} 
+		}
+
 		return newList;
 	}
 

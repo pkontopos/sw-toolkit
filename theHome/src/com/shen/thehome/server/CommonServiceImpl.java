@@ -23,7 +23,8 @@ import com.shen.thehome.client.CommonService;
 public class CommonServiceImpl extends RemoteServiceServlet implements
 		CommonService {
 	MessageStore ms = new MemoryMessageStore();
-	Map<String, Date> userMap = new HashMap<String, Date>();
+	Map<String, Date> userMap = Collections
+			.synchronizedMap(new HashMap<String, Date>());
 
 	public String greetServer(String input) {
 		String serverInfo = getServletContext().getServerInfo();
@@ -55,7 +56,7 @@ public class CommonServiceImpl extends RemoteServiceServlet implements
 		getSession().setAttribute("userId", userId);
 		userMap.put(userId, new Date());
 		userMap.remove(oldId);
-		return "login in";
+		return "login in as " + userId;
 	}
 
 	@Override
