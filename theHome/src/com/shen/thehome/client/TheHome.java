@@ -15,37 +15,44 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.shen.thehome.client.text.RichTextToolbar;
 import com.shen.thehome.client.widget.Clock;
 
 public class TheHome implements EntryPoint {
 
 	private final CommonServiceAsync commonService = GWT
 			.create(CommonService.class);
-	final TextArea mainWin = new TextArea();
-	final TextArea inputArea = new TextArea();
+	// final RichTextArea mainWin = new RichTextArea();
+
+	final ScrollPanel mainWin = new ScrollPanel();
+
+	final RichTextArea inputArea = new RichTextArea();
+
 	final ListBox userListBox = new ListBox(true);
 	final Label status = new Label("idle");
 
 	public void onModuleLoad() {
 		RootPanel rootPanel = RootPanel.get("root");
-		
+
 		DockPanel dock = new DockPanel();
 		rootPanel.add(dock);
 		dock.setStyleName("cw-DockPanel");
 		dock.setSpacing(4);
 		dock.setHorizontalAlignment(DockPanel.ALIGN_CENTER);
 		// Add text all around
-		 
+
 		HorizontalPanel northPanel = new HorizontalPanel();
-		northPanel.setSpacing(3); 
-		//northPanel.add();
-		
+		northPanel.setSpacing(3);
+		// northPanel.add();
+
 		final TextBox userBox = new TextBox();
 		userBox.addChangeHandler(new ChangeHandler() {
 			@Override
@@ -66,33 +73,36 @@ public class TheHome implements EntryPoint {
 		}
 
 		login(userBox.getText());
-		
+
 		dock.add(northPanel, DockPanel.NORTH);
 
 		FlowPanel eastPanel = new FlowPanel();
 		dock.add(eastPanel, DockPanel.EAST);
 
-		userListBox.setSize("140px", "390px");
+		userListBox.setSize("140px", "500px");
 		eastPanel.add(new Clock());
 		eastPanel.add(userListBox);
 
-		HorizontalPanel southPanel = new HorizontalPanel();
-		southPanel.setSpacing(2);
-		FlowPanel userPanel = new FlowPanel();
-		
-		userPanel.add(userBox);
-		userPanel.add(status); 
-		southPanel.add(userPanel); 
-		southPanel.add(inputArea);
+		// HorizontalPanel southPanel = new HorizontalPanel();
+		Grid southPanel = new Grid(2, 2);
+		southPanel.setStyleName("cw-RichText");
+		RichTextToolbar toolbar = new RichTextToolbar(inputArea);
+		toolbar.setStyleName("toolBar");
+		southPanel.setWidget(0, 1, toolbar);
+		inputArea.setSize("100%", "100%");
+		southPanel.setWidget(1, 1, inputArea);
+		userBox.setWidth("150px");
+		southPanel.setWidget(0, 0, userBox);
+		status.setWidth("150px");
+		southPanel.setWidget(1, 0, status);
+
 		dock.add(southPanel, DockPanel.SOUTH);
 
 		FlowPanel scroller = new FlowPanel();
 		DOM.setElementAttribute(mainWin.getElement(), "id", "mainWin");
-		mainWin.setSize("600px", "500px");
+		mainWin.setSize("800px", "400px");
 		mainWin.setStyleName("mainWin");
-		mainWin.setReadOnly(true);
-		inputArea.setSize("380px", "50px");
-		southPanel.add(inputArea);
+		// mainWin.setReadOnly(true);
 		scroller.add(mainWin);
 		dock.add(scroller, DockPanel.CENTER);
 
@@ -101,7 +111,7 @@ public class TheHome implements EntryPoint {
 			public void onKeyUp(KeyUpEvent event) {
 				int code = (int) event.getNativeKeyCode();
 				if (code == 13) {
-					String msg = inputArea.getText();
+					String msg = inputArea.getHTML();
 					inputArea.setText("");
 					commonService.sendMessage(msg, "all", new AsyncCallback() {
 						@Override
@@ -129,7 +139,6 @@ public class TheHome implements EntryPoint {
 			}
 		}.scheduleRepeating(30 * 1000);
 
-		
 	}
 
 	private void getMsg() {
@@ -146,7 +155,8 @@ public class TheHome implements EntryPoint {
 
 				}
 				if (sb.length() > 0) {
-					mainWin.setText(mainWin.getText() + sb);
+					mainWin.getElement().setInnerHTML(
+							mainWin.getElement().getInnerHTML() + sb);
 					scroll();
 				}
 			}
