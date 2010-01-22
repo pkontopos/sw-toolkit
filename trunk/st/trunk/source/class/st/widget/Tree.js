@@ -8,10 +8,14 @@
 
 ************************************************************************ */
 
-/* ************************************************************************
 
-#asset(shen/*)
-#asset(crystal/*)
+
+
+/* ************************************************************************ 
+#asset(qx/icon/Oxygen/22/places/folder.png)
+#asset(qx/icon/Oxygen/22/places/folder-open.png)
+#asset(qx/icon/Oxygen/22/places/user-home.png)
+#asset(qx/icon/Oxygen/22/actions/*)
 ************************************************************************ */
 qx.Class.define("st.widget.Tree", {
   extend     : qx.ui.core.Widget,
@@ -44,14 +48,18 @@ qx.Class.define("st.widget.Tree", {
         var node = treeNodes[i];
         // label,id,parent,toolTipText,icon
         var treeNode = new qx.ui.tree.TreeFolder(node.label);
+        if (!node.label) {
+          node.label = "";
+        }
         if (!node.desc) {
           node.desc = node.label;
         }
         if (!node.icon) {
           if (!this.__root) {
-            node.icon = "st/icon/crystal/22x22/filesystems/folder_home.png";
+            node.icon = "qx/icon/Oxygen/22/places/user-home.png";
           } else {
-            node.icon = "st/icon/crystal/22x22/filesystems/folder.png";
+            node.icon = "qx/icon/Oxygen/22/places/folder.png";
+            node.iconOpen = "qx/icon/Oxygen/22/places/folder-open.png";
           }
         }
         treeNode.set({
@@ -64,6 +72,7 @@ qx.Class.define("st.widget.Tree", {
           draggable : true,
           droppable : true
         })
+        treeNode.addListener("changeOpen", this.__changeOpen); 
         treeNode.addListener("dragstart", this.__dragStart);
         // treeNode.setDropDataTypes(["text/html", "text/plain"]);
         treeNode.supportsDrop = this.__supportsDrop;
@@ -79,6 +88,21 @@ qx.Class.define("st.widget.Tree", {
           }
         }
       }
+    },
+    __changeOpen             : function(e) {
+      var treeNode = e.getTarget(); 
+      var theIcon = treeNode.attributes.icon ;
+     
+      if (treeNode.getOpen()){
+        if (treeNode.attributes.iconOpen){
+          theIcon= treeNode.attributes.iconOpen ;
+        }
+      } 
+      treeNode.set({
+          icon        : theIcon
+      });
+      
+      
     },
     __dragStart             : function(e) {
       node = e.getTarget().attributes;
@@ -112,28 +136,29 @@ qx.Class.define("st.widget.Tree", {
           break;
         case "menu" :
           control = new qx.ui.menu.Menu();
+          var dir = "qx/icon/Oxygen/22/actions/";
           var site7 = new qx.ui.menu.Button("Search",
-          "st/icon/crystal/22x22/actions/search.png");
+          dir+"edit-find.png");
           control.add(site7);
           var site0 = new qx.ui.menu.Button("New",
-          "st/icon/crystal/22x22/actions/folder_new.png");
+          dir+"folder-new.png");
           control.add(site0);
           var site6 = new qx.ui.menu.Button("Rename",
-          "st/icon/crystal/22x22/actions/edit.png");
+          dir+"document-properties.png");
           control.add(site6);
 
           var site1 = new qx.ui.menu.Button("Cut",
-          "st/icon/crystal/22x22/actions/editcut.png");
+          dir+"edit-cut.png");
           control.add(site1);
           var site2 = new qx.ui.menu.Button("Copy",
-          "st/icon/crystal/22x22/actions/editcopy.png");
+          dir+"edit-copy.png");
           control.add(site2);
           var site4 = new qx.ui.menu.Button("Paste",
-          "st/icon/crystal/22x22/actions/editpaste.png");
+          dir+"edit-paste.png");
           control.add(site4);
 
           var site5 = new qx.ui.menu.Button("Delete",
-          "st/icon/crystal/22x22/actions/trash.png");
+          dir+"edit-delete.png");
           control.add(site5);
 
           __menu = control;

@@ -11,7 +11,7 @@
 /* ************************************************************************
 
 #asset(shen/*)
-#asset(crystal/*)
+#asset(qx/icon/Oxygen/16/actions/system-search.png)
 ************************************************************************ */
 qx.Class.define("st.widget.SearchInput", {
   extend     : qx.ui.core.Widget,
@@ -53,7 +53,7 @@ qx.Class.define("st.widget.SearchInput", {
           });
           break;
         case "icon" :
-          control = new qx.ui.basic.Image("st/icon/crystal/16x16/apps/search.png").set(
+          control = new qx.ui.basic.Image("qx/icon/Oxygen/16/actions/system-search.png").set(
           {
             decorator : null,
             margin    : 0,

@@ -10,9 +10,8 @@
 
 /* ************************************************************************
 
-#asset(st/*) 
-#asset(qx/icon/Tango/16/actions/folder_new.png)
-#asset(qx/icon/Tango/16/actions/view_icon.png)
+#asset(qx/icon/Oxygen/16/actions/folder-new.png) 
+#asset(st/icon/catalog/*)
 ************************************************************************ */
 qx.Class.define("st.widget.FileManager", {
   extend     : qx.ui.core.Widget,
@@ -87,7 +86,7 @@ qx.Class.define("st.widget.FileManager", {
     __getToolbar            : function() {
       var toolbar = new qx.ui.toolbar.ToolBar();
       var newFolderBtn = new qx.ui.toolbar.Button("NewFolder", 
-      "qx/icon/Tango/16/actions/folder_new.png").set({});
+      "qx/icon/Oxygen/16/actions/folder-new.png").set({});
 
       var part1 = new qx.ui.toolbar.Part;
       part1.add(newFolderBtn);
@@ -95,7 +94,7 @@ qx.Class.define("st.widget.FileManager", {
       toolbar.addSpacer();
       toolbar.add(this.getSplitButton());
       var searchInput = new st.widget.SearchInput("search").set({
-        margin : 3,
+        margin : 6,
         width  : 200
       });
       toolbar.add(searchInput);
@@ -105,11 +104,11 @@ qx.Class.define("st.widget.FileManager", {
     getSplitButton          : function() {
       var menu = new qx.ui.menu.Menu;
       var site0 = new qx.ui.menu.Button("Icons",
-      "qx/icon/Tango/22/actions/thumbnail.png");
+      "st/icon/catalog/icon.png");
       var site1 = new qx.ui.menu.Button("Tiles",
-      "qx/icon/Tango/22/actions/view_multicolumn.png");
+      "st/icon/catalog/tile.png");
       var site2 = new qx.ui.menu.Button("Details",
-      "qx/icon/Tango/22/actions/view_detailed.png");
+      "st/icon/catalog/list.png");
       menu.setMinWidth(120);
       var debugButton = function() { 
           this.__list.next();
@@ -122,7 +121,7 @@ qx.Class.define("st.widget.FileManager", {
 
       // Create opener button
       var button = new qx.ui.toolbar.SplitButton("",
-      "qx/icon/Tango/16/actions/view_icon.png", menu);
+      "st/icon/catalog/icon.png", menu);
       button.addListener("execute", debugButton,this);
       var basicPart = new qx.ui.toolbar.Part;
       basicPart.add(button);
