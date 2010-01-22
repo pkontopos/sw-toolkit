@@ -2,7 +2,7 @@
 
 /* ************************************************************************
 
-
+#asset(qx/icon/Oxygen/32/apps/*)
 ************************************************************************ */
 
 qx.Class.define("st.widget.AbstractGallery", {
@@ -70,14 +70,14 @@ qx.Class.define("st.widget.AbstractGallery", {
 
     _generateItems   : function(count) {
       var items = [];
-      var iconImages = ["folder_blue.png", "folder_documents.png",
-      "folder_favorites.png", "folder_home.png", "folder_html.png"];
+      var iconImages = ["internet-feed-reader.png", "internet-mail.png",
+      "office-web.png", "office-writer.png", "utilities-keyring.png"];
 
       var aliasManager = qx.util.AliasManager.getInstance();
       var resourceManager = qx.util.ResourceManager.getInstance();
 
       for (var i = 0; i < count; i++) {
-        var icon = "st/icon/crystal/32x32/filesystems/"
+        var icon = "qx/icon/Oxygen/32/apps/"
         + iconImages[Math.floor(Math.random() * iconImages.length)];
         var resolved = aliasManager.resolve(icon);
         var url = resourceManager.toUri(resolved);
