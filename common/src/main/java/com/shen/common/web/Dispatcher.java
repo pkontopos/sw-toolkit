@@ -1,6 +1,6 @@
+package com.shen.common.web;
 
-package com.shen.common;
-
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -10,13 +10,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.shen.common.annotation.Link;
+import org.apache.commons.beanutils.BeanUtils;
+
+import com.shen.common.model.Model;
+import com.shen.common.util.ClassHelpler;
 
 import flexjson.JSONSerializer;
 
@@ -25,17 +29,24 @@ import flexjson.JSONSerializer;
  * @author ZhijieS
  */
 public class Dispatcher extends HttpServlet {
-	String pkg = "";
+	private static final long serialVersionUID = 7871314298902796585L;
+
+	String pkg = null;
+	String imageFormat = null;
 	List<Handler> handlerList = new ArrayList<Handler>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		pkg = config.getInitParameter("package");
+
+		imageFormat = (String) get(config.getInitParameter("imageFormat"),
+				"jpeg");
+
 		List<Class> clsList = ClassHelpler.getClasses(pkg);
 		for (Class cls : clsList) {
 			try {
-				Object obj = cls.getConstructor().newInstance();
+				Object obj = cls.newInstance();
 				Method[] methods = cls.getDeclaredMethods();
 				for (Method method : methods) {
 					if (method.getModifiers() == Modifier.PUBLIC) {
@@ -45,6 +56,7 @@ public class Dispatcher extends HttpServlet {
 							handler.link = link;
 							handler.obj = obj;
 							handler.method = method;
+							handler.imageFormat = imageFormat;
 							handlerList.add(handler);
 						}
 					}
@@ -93,23 +105,32 @@ public class Dispatcher extends HttpServlet {
 		boolean handled = false;
 		for (Handler handler : handlerList) {
 			boolean ret = handler.handle(req, resp);
-			if (ret){
+			if (ret) {
 				handled = true;
 			}
 
 		}
-		if (handled == false){
-			resp.setContentType("text/html"); 
-			PrintWriter  out = resp.getWriter() ;
-			out.println("<li>can't find handler method for this URL under "+pkg+"</li>");
-			out.println("<li>URL format should be context/[className]/[methodName]/...</li>");
-			out.println("<li>'Controller' will be auto removed from ClassName. For example, the URL for UserController(which has a method called create) is context/user/create/...</li>");
+		if (handled == false) {
+			resp.setContentType("text/html");
+			PrintWriter out = resp.getWriter();
+			out.println("<li>can't find handler method for this URL under "
+					+ pkg + "</li>");
+			out
+					.println("<li>URL format should be context/[className]/[methodName]/...</li>");
+			out
+					.println("<li>'Controller' will be auto removed from ClassName. For example, the URL for UserController(which has a method called create) is context/user/create/...</li>");
 		}
 
+	}
+
+	private Object get(Object obj, Object def) {
+		Object ret = (obj == null) ? obj : def;
+		return ret;
 	}
 }
 
 class Handler {
+	String imageFormat;
 
 	String link;
 	Object obj;
@@ -125,14 +146,23 @@ class Handler {
 				int index = 0;
 				Class[] types = method.getParameterTypes();
 				Object[] args = new Object[types.length];
-				for (int i = 0; i < types.length; i++) {
-					Class type = types[i];
+				
+				for (int i = 0; i < types.length; i++) { 
+					Class type = types[i]; 
 					if (HttpServletRequest.class.equals(type)) {
 						args[i] = req;
 					} else if (HttpServletResponse.class.equals(type)) {
 						args[i] = resp;
 					} else if (Map.class.equals(type)) {
 						args[i] = getMap(req);
+					} else if (type.getAnnotation(Model.class) != null) {
+						Map map = getMap(req);
+						Object model = type.newInstance();
+						try {
+							BeanUtils.populate(model, map);
+						} catch (Exception e) {
+						}
+						args[i] = model;
 					} else {
 						Object value = null;
 						if (param.length > index) {
@@ -150,14 +180,20 @@ class Handler {
 						index++;
 					}
 				}
-				Object ret = method.invoke(obj, args); 
-				resp.setContentType("text/html;charset=UTF-8"); 
-				resp.setHeader("Cache-Control", "no-cache"); 
-				if (ret != null) {// to json
-					JSONSerializer serializer = new JSONSerializer();
-					String json = serializer.serialize(ret);
-					//resp.setContentType("text/x-json;charset=UTF-8"); 
-					resp.getWriter().write(json);
+				Object ret = method.invoke(obj, args);
+				resp.setContentType("text/html;charset=UTF-8");
+				resp.setHeader("Cache-Control", "no-cache");
+				if (ret != null) {
+					if (ret instanceof BufferedImage) {
+						resp.setContentType("image/" + imageFormat);
+						ImageIO.write((BufferedImage) ret, imageFormat, resp
+								.getOutputStream());
+					} else {// to json
+						JSONSerializer serializer = new JSONSerializer();
+						String json = serializer.serialize(ret);
+						// resp.setContentType("text/x-json;charset=UTF-8");
+						resp.getWriter().write(json);
+					}
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -202,4 +238,5 @@ class Handler {
 		return map;
 
 	}
+
 }
