@@ -2,7 +2,7 @@
  * @author shen
  * 28/04/2009 
  */
-package com.shen.common;
+package com.shen.common.web;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
