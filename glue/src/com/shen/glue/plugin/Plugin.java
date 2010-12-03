@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.shen.glue.Glue;
+
 public abstract class Plugin {
 	public boolean accept() {
 		return true;
@@ -14,7 +16,7 @@ public abstract class Plugin {
 
 	abstract public void onSuccess(Object retObj);
 
-	abstract public void onError(Exception e); 
+	abstract public void onError(Exception e);
 
 	public static ThreadLocal<Map<String, Object>> threadResource = new ThreadLocal<Map<String, Object>>() {
 		protected synchronized Map<String, Object> initialValue() {
@@ -29,4 +31,33 @@ public abstract class Plugin {
 	public Object get(String attr) {
 		return threadResource.get().get(attr);
 	}
+
+	public static String RETOBJ = "PLUGIN_RETOBJ";
+	public static String CONTENTS = "PLUGIN_CONTENTS";
+	public static String FORWARDTO = "PLUGIN_FORWARDTO";
+
+	public Object getRetObj() {
+		return Glue.get(RETOBJ);
+	}
+
+	public void setRetObj(Object retObj) {
+		Glue.put(RETOBJ, retObj);
+	}
+
+	public String getContents() {
+		return (String) Glue.get(CONTENTS);
+	}
+
+	public void setContents(String contents) {
+		Glue.put(CONTENTS, contents);
+	}
+
+	public String getForwardTo() {
+		return (String) Glue.get(FORWARDTO);
+	}
+
+	public void setForwardTo(String forwardTo) {
+		Glue.put(FORWARDTO, forwardTo);
+	}
+
 }
