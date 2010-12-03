@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.shen.glue.Glue;
 import com.shen.glue.plugin.Plugin;
 
 public class LogPlugin extends Plugin {
@@ -18,12 +19,14 @@ public class LogPlugin extends Plugin {
 
 	@Override
 	public void onSuccess(Object ret) {
-		logger.debug("finished in " + getTime() + "ms");
+		String info = Glue.get("HANDLER_INFO").toString();
+		logger.info(info + " is finished in " + getTime() + "ms");
 	}
 
 	@Override
 	public void onError(Exception e) {
-		logger.debug("finished with error in " + getTime() + "ms");
+		String info = Glue.get("HANDLER_INFO").toString();
+		logger.error(info + " is finished with error in " + getTime() + "ms");
 	}
 
 	private long getTime() {
