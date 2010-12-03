@@ -3,12 +3,13 @@ package com.shen.glue.plugin;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,12 +19,12 @@ import com.google.gson.Gson;
 import com.shen.glue.Glue;
 import com.shen.glue.GlueServlet;
 
-public class JsonPlugin extends Plugin {
+public class HttpPlugin extends Plugin {
 
 	@Override
 	public boolean accept() {
 		String uri = (String) Glue.get(GlueServlet.URI);
-		return uri.endsWith(".json");
+		return (uri.endsWith(".json") || uri.endsWith(".html"));
 	}
 
 	@Override
@@ -45,6 +46,7 @@ public class JsonPlugin extends Plugin {
 				arg = easyMap(req.getParameterMap());
 			} else if (json != null) {
 				arg = gson.fromJson(json, clazz);
+				json = null;
 			} else {
 				try {
 					arg = clazz.getConstructor().newInstance(new Object[0]);
@@ -56,6 +58,7 @@ public class JsonPlugin extends Plugin {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private Map<String, String> easyMap(Map oldMap) {
 		Map<String, String> ret = new HashMap<String, String>();
 		for (Object key : oldMap.keySet()) {
@@ -79,24 +82,19 @@ public class JsonPlugin extends Plugin {
 
 	@Override
 	public void onSuccess(Object retObj) {
-		writeToResp(retObj);
+		String uri = (String) Glue.get(GlueServlet.URI);
+		if (uri.endsWith(".json")) {
+			setRetObj(retObj);
+		} else {
+			if ((retObj != null) && (retObj instanceof String)) {
+				setForwardTo((String) retObj);
+			}
+		}
 	}
 
 	@Override
 	public void onError(Exception e) {
-		writeToResp("error:" + stack2string(e));
-	}
-
-	private void writeToResp(Object obj) {
-		Gson gson = new Gson();
-		String json = gson.toJson(obj);
-		HttpServletResponse resp = (HttpServletResponse) Glue
-				.get(GlueServlet.RESPONSE);
-		try {
-			resp.getWriter().println(json);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		setContents("error:" + stack2string(e));
 	}
 
 	public static String stack2string(Exception e) {
