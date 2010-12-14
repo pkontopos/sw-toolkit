@@ -48,10 +48,10 @@ public class GlueServlet extends HttpServlet {
 		// inject req,resp to bean
 		ServletContext ctx = getServletConfig().getServletContext();
 
-		Glue.putSessionAttribute(URI, uri);
-		Glue.putSessionAttribute(REQUEST, request);
-		Glue.putSessionAttribute(RESPONSE, response);
-		Glue.putSessionAttribute(SERVLET_CONTEXT, ctx);
+		Glue.putThreadAttribute(URI, uri);
+		Glue.putThreadAttribute(REQUEST, request);
+		Glue.putThreadAttribute(RESPONSE, response);
+		Glue.putThreadAttribute(SERVLET_CONTEXT, ctx);
 
 		HandlerCfg handlerCfg = glue.getHandler(uri);
 		if (handlerCfg != null) {
@@ -75,7 +75,7 @@ public class GlueServlet extends HttpServlet {
 			Object handler = glue.getBean(handlerCfg.cls);
 			String info = uri + "->" + handler.getClass().getSimpleName() + "."
 					+ handlerCfg.method.getName();
-			Glue.putSessionAttribute(HANDLER_INFO, info);
+			Glue.putThreadAttribute(HANDLER_INFO, info);
 			logger.debug(info);
 			String forward = null;
 			String content = null;

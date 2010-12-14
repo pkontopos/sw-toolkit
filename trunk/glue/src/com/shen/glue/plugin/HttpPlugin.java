@@ -20,7 +20,7 @@ public class HttpPlugin extends Plugin {
 
 	@Override
 	public boolean accept() {
-		String uri = (String) Glue.getSessionAttribute(GlueServlet.URI);
+		String uri = (String) Glue.getThreadAttribute(GlueServlet.URI);
 		return (uri.endsWith(".json") || uri.endsWith(".html"));
 	}
 
@@ -29,9 +29,9 @@ public class HttpPlugin extends Plugin {
 		Gson gson = new Gson();
 		Class<?>[] types = handler.getParameterTypes();
 		HttpServletResponse resp = (HttpServletResponse) Glue
-				.getSessionAttribute(GlueServlet.RESPONSE);
+				.getThreadAttribute(GlueServlet.RESPONSE);
 		HttpServletRequest req = (HttpServletRequest) Glue
-				.getSessionAttribute(GlueServlet.REQUEST);
+				.getThreadAttribute(GlueServlet.REQUEST);
 		String json = req.getParameter("json");
 		for (Class<?> clazz : types) {
 			Object arg = null;
