@@ -11,13 +11,13 @@ public class StudentService {
 	Session dao;
 
 	@SuppressWarnings("unchecked")
-	public List<Student> listStudent() {
-		System.out.println(dao);
+	public List<Student> listStudent() { 
 		return dao.createQuery("from Student").list();
 	}
 
 	public void addStudent(Student st) {
 		dao.save(st);
+		//throw new RuntimeException("haha");
 	}
 
 	public void deleteStudent(Student st) {
