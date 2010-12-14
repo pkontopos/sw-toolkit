@@ -11,27 +11,27 @@ import com.shen.glue.plugin.Plugin;
 
 public class LogPlugin extends Plugin {
 	Logger logger = Logger.getLogger(LogPlugin.class);
+	Date start = new Date();
 
 	@Override
 	public void exe(List<Object> args, Method handler) {
-		put("start", new Date());
+		start = new Date();
 	}
 
 	@Override
 	public void onSuccess(Object ret) {
-		String info = Glue.get("HANDLER_INFO").toString();
+		String info = Glue.getSessionAttribute("HANDLER_INFO").toString();
 		logger.info(info + " is finished in " + getTime() + "ms");
 	}
 
 	@Override
 	public void onError(Exception e) {
-		String info = Glue.get("HANDLER_INFO").toString();
+		String info = Glue.getSessionAttribute("HANDLER_INFO").toString();
 		logger.error(info + " is finished with error in " + getTime() + "ms");
 	}
 
 	private long getTime() {
-		Date t1 = (Date) get("start");
 		Date t2 = new Date();
-		return t2.getTime() - t1.getTime();
+		return new Date().getTime() - start.getTime();
 	}
 }
