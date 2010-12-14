@@ -1,12 +1,15 @@
 package com.shen.glue.common;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 public class ClassFinder {
 
@@ -34,7 +37,7 @@ public class ClassFinder {
 			while (resources.hasMoreElements()) {
 				URL resource = resources.nextElement();
 				String fileName = resource.getFile();
-				String fileNameDecoded = URLDecoder.decode(fileName, "UTF-8");
+				String fileNameDecoded = URLDecoder.decode(fileName, "UTF-8"); 
 				dirs.add(new File(fileNameDecoded));
 			}
 
@@ -77,9 +80,6 @@ public class ClassFinder {
 					_class = Class.forName(packageName + '.'
 							+ fileName.substring(0, fileName.length() - 6));
 				} catch (ExceptionInInitializerError e) {
-					// happen, for example, in classes, which depend on
-					// Spring to inject some beans, and which fail,
-					// if dependency is not fulfilled
 					_class = Class.forName(
 							packageName
 									+ '.'
@@ -93,8 +93,33 @@ public class ClassFinder {
 		return classes;
 	}
 
+	public static List<Class> getClasseNamesInPackage(String jarName,
+			String packageName) {
+		ArrayList<Class> classes = new ArrayList<Class>();
+		packageName = packageName.replaceAll("\\.", "/");
+		try {
+			JarInputStream jarFile = new JarInputStream(new FileInputStream(
+					jarName));
+			JarEntry jarEntry; 
+			while (true) {
+				jarEntry = jarFile.getNextJarEntry();
+				if (jarEntry == null) {
+					break;
+				}
+				if ((jarEntry.getName().startsWith(packageName))
+						&& (jarEntry.getName().endsWith(".class"))) {
+					classes.add(Class.forName(jarEntry.getName().replaceAll(
+							"/", "\\.")));
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return classes;
+	}
+
 	public static void main(String[] args) {
-		List<Class> clses = ClassFinder.getClasses("test");
+		List<Class> clses = ClassFinder.getClasses("com.shen.glue");
 		for (Class cls : clses) {
 			System.out.println(cls.getSimpleName());
 		}

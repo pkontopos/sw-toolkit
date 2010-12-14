@@ -1,8 +1,10 @@
 package com.shen.glue;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
+import com.shen.glue.Glue.HandlerCfg;
 import com.shen.glue.plugin.HibernatePlugin;
 import com.shen.glue.plugin.HttpPlugin;
 import com.shen.glue.plugin.Plugin;
@@ -31,9 +34,9 @@ public class GlueServlet extends HttpServlet {
 
 	public GlueServlet() {
 		super();
-		Glue.plugins.add(new HibernatePlugin());
-		Glue.plugins.add(new HttpPlugin());
-		System.out.println("Glue servlet is started");
+		Glue.plugins.add(HibernatePlugin.class);
+		Glue.plugins.add(HttpPlugin.class);
+		logger.info("Glue servlet is started");
 	}
 
 	@Override
@@ -45,55 +48,75 @@ public class GlueServlet extends HttpServlet {
 		// inject req,resp to bean
 		ServletContext ctx = getServletConfig().getServletContext();
 
-		Glue.put(URI, uri);
-		Glue.put(REQUEST, request);
-		Glue.put(RESPONSE, response);
-		Glue.put(SERVLET_CONTEXT, ctx);
-		Glue.addRS(request);
-		Glue.addRS(response);
+		Glue.putSessionAttribute(URI, uri);
+		Glue.putSessionAttribute(REQUEST, request);
+		Glue.putSessionAttribute(RESPONSE, response);
+		Glue.putSessionAttribute(SERVLET_CONTEXT, ctx);
 
-		Method handlerMethod = glue.getHandlerMethod(uri);
-		if (handlerMethod != null) {
+		HandlerCfg handlerCfg = glue.getHandler(uri);
+		if (handlerCfg != null) {
 			List<Object> args = new ArrayList<Object>();
-			for (int i = Glue.plugins.size() - 1; i >= 0; i--) {
-				Plugin plugin = Glue.plugins.get(i);
-				if (plugin.accept()) {
-					plugin.exe(args, handlerMethod);
+			List<Plugin> plugins = new ArrayList<Plugin>();
+			for (Class<Plugin> pluginCls : Glue.plugins) {
+				try {
+					Plugin plugin;
+					plugin = (Plugin) pluginCls.getConstructor(new Class[0])
+							.newInstance(new Object[0]);
+					plugins.add(plugin);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
-			Object handler = glue.getHandler(uri);
+			for (Plugin plugin : plugins) {
+				if (plugin.accept()) {
+					plugin.exe(args, handlerCfg.method);
+				}
+			}
+			Object handler = glue.getBean(handlerCfg.cls);
 			String info = uri + "->" + handler.getClass().getSimpleName() + "."
-					+ handlerMethod.getName();
-			Glue.put(HANDLER_INFO, info);
+					+ handlerCfg.method.getName();
+			Glue.putSessionAttribute(HANDLER_INFO, info);
 			logger.debug(info);
+			String forward = null;
+			String content = null;
+			Object retObj = null;
 			try {
-				Object retObj = handlerMethod.invoke(handler, args.toArray());
-				for (Plugin plugin : Glue.plugins) {
+				retObj = handlerCfg.method.invoke(handler, args.toArray());
+				Collections.reverse(plugins);
+				for (Plugin plugin : plugins) {
 					if (plugin.accept()) {
+						plugin.forward = forward;
+						plugin.content = content;
+						plugin.retObj = retObj;
 						plugin.onSuccess(retObj);
+						forward = plugin.forward;
+						content = plugin.content;
+						retObj = plugin.retObj;
 					}
 				}
 			} catch (Exception e) {
-				for (Plugin plugin : Glue.plugins) {
+				for (Plugin plugin : plugins) {
 					if (plugin.accept()) {
+						plugin.forward = forward;
+						plugin.content = content;
+						plugin.retObj = retObj;
 						plugin.onError(e);
+						forward = plugin.forward;
+						content = plugin.content;
+						retObj = plugin.retObj;
 					}
 				}
 			}
-			String forwardTo = (String) Glue.get(Plugin.FORWARDTO);
-			String contents = (String) Glue.get(Plugin.CONTENTS);
-			Object jsonObj = Glue.get(Plugin.RETOBJ);
-			if (forwardTo != null) {
-				ctx.getRequestDispatcher("/" + forwardTo + ".jsp").forward(
+			if (forward != null) {
+				request.setAttribute("obj", retObj);
+				ctx.getRequestDispatcher("/" + forward + ".jsp").forward(
 						request, response);
-			} else if (contents != null) {
-				response.getWriter().println(contents);
-			} else if (jsonObj != null) {
+			} else if (content != null) {
+				response.getWriter().println(content);
+			} else if (retObj != null) {
 				Gson gson = new Gson();
-				String json = gson.toJson(jsonObj);
-				HttpServletResponse resp = (HttpServletResponse) Glue
-						.get(GlueServlet.RESPONSE);
-				resp.getWriter().println(json);
+				String json = gson.toJson(retObj);
+				response.getWriter().println(json);
 			}
 		}
 		Glue.attr.remove();
@@ -101,7 +124,7 @@ public class GlueServlet extends HttpServlet {
 
 	@Override
 	public void destroy() {
-		Glue.rs.remove();// ?
+		Glue.attr.remove();
 		super.destroy();
 	}
 }

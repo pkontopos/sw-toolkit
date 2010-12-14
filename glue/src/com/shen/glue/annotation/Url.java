@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface Url {
 	String value();
 	boolean transaction() default true;
+	boolean readOnly() default false;
 }
