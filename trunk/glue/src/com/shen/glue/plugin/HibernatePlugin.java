@@ -13,12 +13,14 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
 import com.shen.glue.Glue;
+import com.shen.glue.annotation.Url;
 import com.shen.glue.common.ClassFinder;
 
 public class HibernatePlugin extends Plugin {
 	Logger logger = Logger.getLogger(HibernatePlugin.class);
 
 	SessionFactory sf;
+	Transaction tx;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public HibernatePlugin() {
@@ -42,25 +44,30 @@ public class HibernatePlugin extends Plugin {
 
 	@Override
 	public void exe(List<Object> args, Method handler) {
-		Session sess = sf.openSession();
-		Transaction tx = sess.beginTransaction();
-		put("tx", tx);
-		Glue.addRS(sess);
-		Glue.addRS(tx); 
+		Url tag = handler.getAnnotation(Url.class);
+		if (tag.transaction()) {
+			Session sess = sf.openSession();
+			sess.setDefaultReadOnly(tag.readOnly());
+			tx = sess.beginTransaction();
+			Glue.putSessionAttribute("HibernatePlugin_sess",sess);
+			Glue.putSessionAttribute("HibernatePlugin_tx",tx);
+		}
 	}
 
 	@Override
 	public void onSuccess(Object ret) {
-		Transaction tx = (Transaction) get("tx");
-		tx.commit();
-		logger.debug("commited");
+		if (tx != null) {
+			tx.commit();
+			logger.debug("commited");
+		}
 	}
 
 	@Override
 	public void onError(Exception e) {
 		e.printStackTrace();
-		Transaction tx = (Transaction) get("tx");
-		tx.rollback();
+		if (tx != null) {
+			tx.rollback();
+		}
 		if (e instanceof InvocationTargetException) {
 			InvocationTargetException ex = (InvocationTargetException) e;
 			e = (Exception) ex.getCause();
