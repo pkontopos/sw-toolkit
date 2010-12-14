@@ -28,11 +28,11 @@ public class Glue {
 		}
 	};
 
-	public static void putSessionAttribute(String key, Object obj) {
+	public static void putThreadAttribute(String key, Object obj) {
 		attr.get().put(key, obj);
 	}
 
-	public static Object getSessionAttribute(String key) {
+	public static Object getThreadAttribute(String key) {
 		return attr.get().get(key);
 	}
 

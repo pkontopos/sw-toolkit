@@ -49,8 +49,8 @@ public class HibernatePlugin extends Plugin {
 			Session sess = sf.openSession();
 			sess.setDefaultReadOnly(tag.readOnly());
 			tx = sess.beginTransaction();
-			Glue.putSessionAttribute("HibernatePlugin_sess",sess);
-			Glue.putSessionAttribute("HibernatePlugin_tx",tx);
+			Glue.putThreadAttribute("HibernatePlugin_sess",sess);
+			Glue.putThreadAttribute("HibernatePlugin_tx",tx);
 		}
 	}
 
