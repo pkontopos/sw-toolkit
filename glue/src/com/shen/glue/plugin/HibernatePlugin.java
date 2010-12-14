@@ -17,24 +17,28 @@ import com.shen.glue.annotation.Url;
 import com.shen.glue.common.ClassFinder;
 
 public class HibernatePlugin extends Plugin {
-	Logger logger = Logger.getLogger(HibernatePlugin.class);
+	final public static String SESSION = "SESSION";
+	final public static String TX = "TX";
 
-	SessionFactory sf;
+	Logger logger = Logger.getLogger(HibernatePlugin.class);
+	public static SessionFactory sf;
 	Transaction tx;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public HibernatePlugin() {
-		Configuration cfg = new Configuration();
-		String[] names = Glue.beanDir.split(",");
-		for (String pkg : names) {
-			List<Class> clses = ClassFinder.getClasses(pkg);
-			for (Class cls : clses) {
-				if (cls.isAnnotationPresent(Entity.class)) {
-					cfg.addAnnotatedClass(cls);
+		if (sf == null) {
+			Configuration cfg = new Configuration();
+			String[] names = Glue.beanDir.split(",");
+			for (String pkg : names) {
+				List<Class> clses = ClassFinder.getClasses(pkg);
+				for (Class cls : clses) {
+					if (cls.isAnnotationPresent(Entity.class)) {
+						cfg.addAnnotatedClass(cls);
+					}
 				}
 			}
+			sf = cfg.buildSessionFactory();
 		}
-		sf = cfg.buildSessionFactory();
 	}
 
 	@Override
@@ -49,8 +53,8 @@ public class HibernatePlugin extends Plugin {
 			Session sess = sf.openSession();
 			sess.setDefaultReadOnly(tag.readOnly());
 			tx = sess.beginTransaction();
-			Glue.putThreadAttribute("HibernatePlugin_sess",sess);
-			Glue.putThreadAttribute("HibernatePlugin_tx",tx);
+			Glue.putThreadAttribute(SESSION, sess);
+			Glue.putThreadAttribute(TX, tx);
 		}
 	}
 
@@ -64,7 +68,7 @@ public class HibernatePlugin extends Plugin {
 
 	@Override
 	public void onError(Exception e) {
-		e.printStackTrace();
+		//e.printStackTrace();
 		if (tx != null) {
 			tx.rollback();
 		}
@@ -73,7 +77,7 @@ public class HibernatePlugin extends Plugin {
 			e = (Exception) ex.getCause();
 		}
 		StackTraceElement st = e.getStackTrace()[0];
-		logger.debug("rollbacked because of " + e.getClass().getSimpleName()
+		logger.error("rollbacked because of " + e.getClass().getSimpleName()
 				+ " from (" + st.getFileName() + ":" + st.getLineNumber() + ")");
 	}
 
