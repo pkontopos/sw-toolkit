@@ -30,8 +30,7 @@ public class LogPlugin extends Plugin {
 		logger.error(info + " is finished with error in " + getTime() + "ms");
 	}
 
-	private long getTime() {
-		Date t2 = new Date();
+	private long getTime() { 
 		return new Date().getTime() - start.getTime();
 	}
 }
