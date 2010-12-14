@@ -20,13 +20,13 @@ public class LogPlugin extends Plugin {
 
 	@Override
 	public void onSuccess(Object ret) {
-		String info = Glue.getSessionAttribute("HANDLER_INFO").toString();
+		String info = Glue.getThreadAttribute("HANDLER_INFO").toString();
 		logger.info(info + " is finished in " + getTime() + "ms");
 	}
 
 	@Override
 	public void onError(Exception e) {
-		String info = Glue.getSessionAttribute("HANDLER_INFO").toString();
+		String info = Glue.getThreadAttribute("HANDLER_INFO").toString();
 		logger.error(info + " is finished with error in " + getTime() + "ms");
 	}
 
