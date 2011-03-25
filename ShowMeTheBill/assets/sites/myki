@@ -1,0 +1,25 @@
+URL=https://www.mymyki.com.au/NTSWebPortal/Login.aspx
+<-- 
+	$('#ctl00_uxContentPlaceHolder_uxUsername').val(SMTB.user);
+	$('#ctl00_uxContentPlaceHolder_uxPassword').val(SMTB.pass);
+	$('#ctl00_uxContentPlaceHolder_uxLogin').click();
+-->
+URL=https://www.mymyki.com.au/NTSWebPortal/Registered/MyMykiAccount.aspx?menu=My%20myki%20account
+<-- 
+	var mykiInfo = "";
+	$('#ctl00_uxContentPlaceHolder_uxMyCards td').each(function(index){
+		if (index==0){
+			mykiInfo = mykiInfo + "account=" + $(this).find("a").html() +";";
+		}else if (index==1){
+			mykiInfo = mykiInfo + "user=" + $(this).html() +";";
+		}else if (index==2){
+			mykiInfo = mykiInfo + "MykiMoney=" + $(this).html() +";";
+		}else if (index==3){
+			mykiInfo = mykiInfo + "MykiPass=" + $(this).find("p").html() +"";
+		} 
+	});
+	if (mykiInfo!="") {
+		mykiInfo = mykiInfo.replace(/\n|\r|\t/g,"");
+		SMTB_CALL.setValue(mykiInfo);
+	} 
+-->
