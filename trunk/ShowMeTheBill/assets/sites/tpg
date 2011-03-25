@@ -1,0 +1,15 @@
+URL=https://cyberstore.tpg.com.au/your_account/
+<--  
+	if ($('input[name="check_username"]').size()==0){
+		window.location = "https://cyberstore.tpg.com.au/your_account/index.php?function=checkaccountusage";
+	} else {
+		$('input[name="check_username"]').val(SMTB.user);
+		$('input[name="password"]').val(SMTB.pass);
+		$('input[name="Submit"]').click();
+	} 
+-->
+URL=https://cyberstore.tpg.com.au/your_account/index.php?function=checkaccountusage
+	var test = $('div.right_content table').eq(1).html();
+	if (test!=null){
+		SMTB_CALL.setValue("test="+test);
+	}
