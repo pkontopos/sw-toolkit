@@ -1,12 +1,11 @@
 package com.shen.webglue.test;
 
-import com.shen.webglue.core.Glue;
-import com.shen.webglue.plugin.HibernatePlugin;
-import com.shen.webglue.test.helper.User;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import com.shen.webglue.core.Glue;
+import com.shen.webglue.test.helper.User;
 
 /**
  * Unit test for simple App.
@@ -36,7 +35,5 @@ public class CoreTest extends TestCase {
 		Object ret = glue.run("testServiceWithCtx");
 		assertTrue("hello shen".equals(ret));
 	}
-	
-	
 
 }

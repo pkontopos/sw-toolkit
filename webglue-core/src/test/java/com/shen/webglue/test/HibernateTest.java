@@ -51,11 +51,11 @@ public class HibernateTest extends TestCase {
 		User user3 = new User("rollback", 18);
 		Glue.put("user", user3);
 		glue.run("saveUser");
-		
+
 		User user4 = new User("shen2", 18);
 		Glue.put("user", user4);
 		glue.run("saveUser");
-		
+
 		int count2 = ((List<User>) glue.run("listUser")).size();
 		assertTrue(count2 - count == 3);
 	}
