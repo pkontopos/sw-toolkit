@@ -17,13 +17,18 @@ import com.shen.webglue.common.ClassFinder;
 import com.shen.webglue.core.Glue;
 import com.shen.webglue.core.Plugin;
 
+/**
+ * giving hibernate transaction support
+ * @author ZhijieS
+ *
+ */
 public class HibernatePlugin implements Plugin {
 	final public static String HIBERNATEPLUGIN_SESSION = "HIBERNATEPLUGIN_SESSION";
 	final public static String HibernatePlugin_TX = "HibernatePlugin_TX";
 
-	Logger logger = Logger.getLogger(HibernatePlugin.class);
-	public static SessionFactory sf;
-	Transaction tx;
+	static Logger logger = Logger.getLogger(HibernatePlugin.class);
+	private static SessionFactory sf;
+	private Transaction tx;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public HibernatePlugin() {
@@ -74,7 +79,6 @@ public class HibernatePlugin implements Plugin {
 				logger.debug("commited");
 			}
 		}
-
 	}
 
 	public void destory() {

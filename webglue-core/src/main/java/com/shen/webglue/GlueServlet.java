@@ -24,7 +24,7 @@ public class GlueServlet extends HttpServlet {
 	public static String RESPONSE = "RESPONSE";
 	public static String SERVLET_CONTEXT = "SERVLET_CONTEXT";
 
-	public static final String PAGE_URI = "PAGE_URI";
+	public static final String FORWARD_TO = "PAGE_URI";
 	public static final String PAGE_OBJ = "PAGE_OBJ";
 
 	Logger logger = Logger.getLogger(GlueServlet.class);
@@ -57,9 +57,9 @@ public class GlueServlet extends HttpServlet {
 
 		Glue.get().run(uri);
 
-		if (getPageUri() != null) {
-			request.setAttribute("obj", getPageUri());
-			ctx.getRequestDispatcher("/" + getPageUri()).forward(request,
+		if (getForward() != null) {
+			request.setAttribute("obj", getPageObj());
+			ctx.getRequestDispatcher("/" + getForward()).forward(request,
 					response);
 		} else if (getPageObj() != null) {
 			response.getWriter().println(getPageObj());
@@ -73,14 +73,23 @@ public class GlueServlet extends HttpServlet {
 		super.destroy();
 	}
 
-	public static void setPageUri(String url) {
-		Glue.put(GlueServlet.PAGE_URI, url);
+	/**
+	 * if it's set, means the page needs to be forwarded to that url
+	 * @param url
+	 */
+	public static void setForward(String url) {
+		Glue.put(GlueServlet.FORWARD_TO, url);
 	}
 
-	public static String getPageUri() {
-		return (String) Glue.get(GlueServlet.PAGE_URI);
+	public static String getForward() {
+		return (String) Glue.get(GlueServlet.FORWARD_TO);
 	}
 
+	/**
+	 * 1 if the page will be forwarded to an jsp, then this is put in application attribute named "obj";
+	 * 2 otherwise it will be converted to a json string and written to response
+	 * @param url
+	 */
 	public static void setPageObj(Object obj) {
 		Glue.put(GlueServlet.PAGE_OBJ, obj);
 	}

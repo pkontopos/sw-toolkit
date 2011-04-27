@@ -18,6 +18,17 @@ import com.shen.webglue.GlueServlet;
 import com.shen.webglue.core.Glue;
 import com.shen.webglue.core.Plugin;
 
+/**
+ * does 2 things:
+ * 1  when request comes, it try to auto populate data
+ * 2  when method returns an object:
+ *    a  if it's a string end with jsp, it forwards to that page
+ *    b  if it's a normal string, write it to response
+ *    c  if it's an object with json appendix uri , convert to json string and write to response.
+ *    d  otherwise auto forward to the jsp page with same name.
+ * @author ZhijieS
+ *
+ */
 public class HttpPlugin implements Plugin {
 	Logger logger = Logger.getLogger(HttpPlugin.class);
 
@@ -72,22 +83,28 @@ public class HttpPlugin implements Plugin {
 			Glue.put(GlueServlet.PAGE_OBJ, msg);
 		} else {
 			Object retObj = Glue.get(Glue.RETURN_OBJ);
-			if (retObj instanceof String) { // html or uri
-				String retStr = (String) retObj;
-				if (retStr.endsWith("jsp")) {//goto jsp
-					GlueServlet.setPageUri(retStr);
-					GlueServlet.setPageObj(retObj);
-				} else {// html content
-					GlueServlet.setPageUri(null);
-				}
-			} else { //   convert Object to gson string
-				Gson gson = new Gson();
-				String json = gson.toJson(retObj);
-				GlueServlet.setPageObj(json);
-				if (GlueServlet.getPageUri() == null) {// auto use original uri
+			if (retObj != null) {
+
+				if (retObj instanceof String) { // html or uri
+					String retStr = (String) retObj;
+					if (retStr.endsWith("jsp")) {//goto jsp
+						GlueServlet.setForward(retStr);
+						GlueServlet.setPageObj(retObj);
+					} else {// html content
+						GlueServlet.setForward(null);
+						GlueServlet.setPageObj(retObj);
+					}
+				} else { //   convert Object to gson string
 					String uri = GlueServlet.getOrginalUri();
-					uri = uri.split(".")[0] + ".jsp";
-					GlueServlet.setPageUri(uri);
+					if (uri.endsWith("json")) {
+						Gson gson = new Gson();
+						String json = gson.toJson(retObj);
+						GlueServlet.setPageObj(json);
+					} else {// auto use original uri  
+						uri = uri.split(".")[0] + ".jsp";
+						GlueServlet.setForward(uri);
+						GlueServlet.setPageObj(retObj);
+					}
 				}
 			}
 		}
