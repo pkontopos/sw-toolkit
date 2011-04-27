@@ -23,7 +23,7 @@ public class Glue {
 
 	public static String beanDir = null;
 
-	Logger logger = Logger.getLogger(Glue.class);
+	static Logger logger = Logger.getLogger(Glue.class);
 
 	@SuppressWarnings("rawtypes")
 	public static List<Class> plugins = new ArrayList<Class>();
@@ -177,11 +177,13 @@ public class Glue {
 
 	public static Glue get() {
 		if (instance == null) {
+			logger.debug("-----------------starting GLUE service -------------------");
 			instance = new Glue();
 			if (Glue.beanDir == null) {
 				Glue.beanDir = Utils.getCfg("beanDir");
 			}
 			instance.scanPkgs();
+			logger.debug("-----------------GLUE service initialized -------------------");
 		}
 		return instance;
 	}
